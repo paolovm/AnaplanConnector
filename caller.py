@@ -13,33 +13,41 @@ pwd = "Number28"
 
 
 #DEFINIR RELACAO IMPORT/ARQUIVOS EM PARES PARA EXECUTAR A MAIN EM LOOP
-# Lista de Imports a serem executados com nome assim como na tab de actions do Anaplan
-importName = "Asset Price from quotes.csv"
-
-# Localizacao dos arquivos associados com os imports
-fileLocation= "quotes.csv"
+importList = {"Asset Price from quotes.csv": "quotes.csv"}
 
 # Lista de Processes a serem executados com nome assim como na tab de actions do Anaplan
-processName = "Testing Process"
+processName = ["Testing Process"]
 
-# comentario extra para testar git
-#
+# funcao para Import de arquivo
+def singleFileImport(conn, importName, fileLocation):
+    with open(fileLocation, "rt") as f:
+        data_content = f.read()
+    f.close()
+    # execucao do subprocesso de import
+    anaplanImport = anaplan().executeImport(conn, importName, data_content)
+    print("999 - Import Complete")
+
+# funcao para execucao de processo
+def singleProcessExecution(conn, processName):
+    # execucao do subprocesso de import
+    anaplanImport = anaplan().executeProcess(conn, processName)
+    print("999 - Process Complete")
+
+
 def main():
     try:
-        # leitura do arquivo
-        with open(fileLocation, "rt") as f:
-                data_content=f.read()
-        f.close()
-        print("001 - Data Content Retrieved. See below:")
-        print("002 - Anaplan Import Script Starting")
-
-        # execucao do subprocesso de import
-        anaplanImport = anaplan().executeImport(user, pwd, model, importName, processName, data_content)
-        print("999 - Execution Complete")
-
+        # conectar ao Anaplan
+        conn= anaplan().connectToAnaplanModel(user, pwd, model)
+        for importAction, importFile in importList.items():
+            singleFileImport(conn, importAction, importFile)
+        for each_process in processName:
+            singleProcessExecution(conn, each_process)
     except:
         print("998 - An exception occurred.")
 
 
+
 if __name__ == '__main__':
     main()
+
+

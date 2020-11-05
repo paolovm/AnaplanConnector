@@ -21,11 +21,10 @@ __post_body__ = {
             "localeName":"en_US"
         }
 
-
-
 class anaplanImport(object):
+
     @classmethod
-    def executeImport(cls, email, password, modelName, importFile, processName, contentToSend):
+    def connectToAnaplanModel(cls, email, password, modelName):
         # Get the token
         print("003 - Anaplan Import Script Started")
         tokenValue = cls.getTokenBasicAuth(email, password)
@@ -36,37 +35,61 @@ class anaplanImport(object):
         modelInfos = cls.getWsModelIds(tokenValue, modelName)
         modelId = modelInfos[0]
         workspaceId = modelInfos[1]
-        conn = AnaplanConnection(tokenValue, workspaceId, modelId)
         print("006 - Workspace and Model ID Retrieved. See below:")
         print(modelId)
         print(workspaceId)
+        conn = AnaplanConnection(tokenValue, workspaceId, modelId)
+        return conn
+
+    @classmethod
+    def executeImport(cls, conn, importFile, contentToSend):
+        tokenValue = conn.authorization
+        workspaceId = conn.workspaceGuid
+        modelId = conn.modelGuid
         # Get the list of imports and choose one with the importId and the datasourceId
-        print ("007 - Retrieving the list of imports")
+        print ("IMPORT001 - Retrieving the list of imports")
         importInfos = cls.getImportInfo(tokenValue, workspaceId, modelId, importFile)
         print(importInfos)
-        print ("008 - Import and Datasource ID retrieved. See below:")
+        print ("IMPORT002 - Import and Datasource ID retrieved. See below:")
         importId = importInfos[0]
         datasourceId = importInfos[1]
         print(importId , datasourceId)
         # Send the data to Anaplan to update datasource
-        print("009 - Sending the data to Anaplan")
+        print("IMPORT003 - Sending the data to Anaplan")
         sendData = cls.sendData(tokenValue, workspaceId, modelId, datasourceId, 1, contentToSend)
-        print("010 - Data Sent")
+        print("IMPORT004 - Data Sent")
         # # Trigger the import
-        print("011 - Executing the Import")
+        print("IMPORT005 - Executing the Import")
+        executeImport = cls.importTrigger(tokenValue, workspaceId, modelId, importId)
+        print("IMPORT006 - Import Triggered")
+        # # Get the status of the import
+        print("IMPORT007 - Checking status of import")
+        checkStatusImport = cls.check_status(tokenValue, workspaceId, modelId, importId,
+                                                  executeImport)
+        print("IMPORT008 - Status Retrieved")
+        #sendemail.sendEmail()
+        print(checkStatusImport)
+
+    @classmethod
+    def executeProcess(cls, conn, processName):
+        tokenValue = conn.authorization
+        workspaceId = conn.workspaceGuid
+        modelId = conn.modelGuid
+        # Get the list of imports and choose one with the importId and the datasourceId
+        print("PROC001 - Retrieving the list of imports")
+        importId = cls.getProcessInfo(tokenValue, workspaceId, modelId, processName)
+        print("PROC002 - Import ID retrieved. See below:")
+        print(importId)
+        # # Trigger the import
+        print("PROC005 - Executing the Process")
         processInfos = cls.getProcessInfo(tokenValue, workspaceId, modelId, processName)
         processId = processInfos
         executeImport = anaplanLib.execute_action_with_parameters(conn, processId, 3)
-        #executeImport = cls.importTrigger(tokenValue, workspaceId, modelId, importId)
         print("012 - Import Triggered")
         # # Get the status of the import
-        print("013 - Checking status of import")
-        #checkStatusImport = cls.check_status(tokenValue, workspaceId, modelId, importId,
-         #                                          executeImport)
-        print("014 - Status Retrieved")
         print(executeImport)
-        sendemail.sendEmail()
-        #print(checkStatusImport)
+#        sendemail.sendEmail()
+
 
     @classmethod
     def getTokenBasicAuth(cls, email, password):
