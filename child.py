@@ -6,15 +6,6 @@ import anaplanLib
 import sendemail
 from AnaplanConnection import AnaplanConnection
 
-#import sys
-#import os
-#import hashlib
-#from cryptography.hazmat.primitives import serialization, hashes
-#from cryptography.hazmat.primitives.asymmetric import padding
-#from cryptography.hazmat.backends import default_backend
-#from cryptography.hazmat.primitives.serialization import load_pem_private_key
-
-
 urlAuth = "https://auth.anaplan.com/token/authenticate"
 urlStem = "https://api.anaplan.com/2/0"
 __post_body__ = {
@@ -26,18 +17,15 @@ class anaplanImport(object):
     @classmethod
     def connectToAnaplanModel(cls, email, password, modelName):
         # Get the token
-        print("003 - Anaplan Import Script Started")
+        print("CONN01 - Anaplan Connection starting")
         tokenValue = cls.getTokenBasicAuth(email, password)
-        print("004 - Anaplan Token Value Retrieved. See below:")
-        print(tokenValue)
+        print("CONN02 - Anaplan Token Value Retrieved")
         # Get the list of models and choose one
-        print ("005 - Getting Ws and Model IDs")
+        print ("CONN03 - Getting Ws and Model IDs")
         modelInfos = cls.getWsModelIds(tokenValue, modelName)
         modelId = modelInfos[0]
         workspaceId = modelInfos[1]
-        print("006 - Workspace and Model ID Retrieved. See below:")
-        print(modelId)
-        print(workspaceId)
+        print("CONN04 - Workspace and Model ID Retrieved")
         conn = AnaplanConnection(tokenValue, workspaceId, modelId)
         return conn
 
@@ -49,11 +37,9 @@ class anaplanImport(object):
         # Get the list of imports and choose one with the importId and the datasourceId
         print ("IMPORT001 - Retrieving the list of imports")
         importInfos = cls.getImportInfo(tokenValue, workspaceId, modelId, importFile)
-        print(importInfos)
         print ("IMPORT002 - Import and Datasource ID retrieved. See below:")
         importId = importInfos[0]
         datasourceId = importInfos[1]
-        print(importId , datasourceId)
         # Send the data to Anaplan to update datasource
         print("IMPORT003 - Sending the data to Anaplan")
         sendData = cls.sendData(tokenValue, workspaceId, modelId, datasourceId, 1, contentToSend)
@@ -67,8 +53,10 @@ class anaplanImport(object):
         checkStatusImport = cls.check_status(tokenValue, workspaceId, modelId, importId,
                                                   executeImport)
         print("IMPORT008 - Status Retrieved")
-        #sendemail.sendEmail()
-        print(checkStatusImport)
+        emailSubject = "Anaplan Execution - " + importFile
+        emailText = checkStatusImport
+        sendemail.sendEmail(emailSubject,emailText)
+#        print(checkStatusImport)
 
     @classmethod
     def executeProcess(cls, conn, processName):
@@ -77,19 +65,17 @@ class anaplanImport(object):
         modelId = conn.modelGuid
         # Get the list of imports and choose one with the importId and the datasourceId
         print("PROC001 - Retrieving the list of imports")
-        importId = cls.getProcessInfo(tokenValue, workspaceId, modelId, processName)
-        print("PROC002 - Import ID retrieved. See below:")
-        print(importId)
-        # # Trigger the import
-        print("PROC005 - Executing the Process")
         processInfos = cls.getProcessInfo(tokenValue, workspaceId, modelId, processName)
         processId = processInfos
+        print("PROC002 - Import ID retrieved. See below:")
+        # # Trigger the import
+        print("PROC003 - Executing the Process")
         executeImport = anaplanLib.execute_action_with_parameters(conn, processId, 3)
-        print("012 - Import Triggered")
+        print("PROC004 - Process Executed")
         # # Get the status of the import
-        print(executeImport)
-#        sendemail.sendEmail()
-
+        emailSubject = "Anaplan Execution - " + processName
+        emailText = executeImport
+        sendemail.sendEmail(emailSubject, emailText)
 
     @classmethod
     def getTokenBasicAuth(cls, email, password):
@@ -128,9 +114,7 @@ class anaplanImport(object):
             headers=headers
         )
         jsonResponse = json.loads(response.content)
-        print(jsonResponse)
         importsArray = jsonResponse["imports"]
-        print(importsArray)
         importsInfo = [importInfo for importInfo in importsArray if importInfo['name'] == importName]
         importId = importsInfo[0]["id"]
         datasourceId = importsInfo[0]["importDataSourceId"]
@@ -145,9 +129,7 @@ class anaplanImport(object):
             headers=headers
         )
         jsonResponse = json.loads(response.content)
-        print(jsonResponse)
         processesArray = jsonResponse["processes"]
-        print(processesArray)
         processesInfo = [processInfo for processInfo in processesArray if processInfo['name'] == processName]
         processId = processesInfo[0]["id"]
         return processId
@@ -156,7 +138,7 @@ class anaplanImport(object):
     def sendData(cls, token, wsId, modelId, fileId, chunkCount, content):
         # Send the data to Anaplan to update datasource
         ## First, tell Anaplan API's server it will receive one chunk
-        print("009.1 - Telling Anaplan it will receive one chunk")
+        #print("009.1 - Telling Anaplan it will receive one chunk")
         headers = {'Authorization': 'AnaplanAuthToken %s' % token, 'Content-Type': 'application/json'}
         data = json.dumps({'id': fileId, "chunkCount": chunkCount})
         response = requests.post(
@@ -164,15 +146,10 @@ class anaplanImport(object):
             headers=headers,
             data=data
         )
-        print("009.2 - Told Anaplan it will receive one chunk")
+        #print("009.2 - Told Anaplan it will receive one chunk")
         ## Now let's send the file
         headers2 = {'Authorization': 'AnaplanAuthToken %s' % token, 'Content-Type': 'application/octet-stream'}
-
-
-        # Opens the data file (filData['name'] by default) and encodes it to utf-8
-        print("009.3 - Opening and encoding data file")
-        print("009.4 - Data file opened")
-        print("009.5 - Put command starting")
+        #print("009.3 - Put command starting")
         response2 = requests.put(
             urlStem + "/workspaces/" + wsId + "/models/" + modelId + "/files/" + fileId + "/chunks/" + str(
             chunkCount - 1)
@@ -180,9 +157,8 @@ class anaplanImport(object):
             headers=headers2,
             data=content
         )
-        print("009.6 - Put command finished")
+        #print("009.4 - Put command finished")
         status_code = response2.status_code
-        print(status_code)
         return status_code
 
     @classmethod
@@ -198,7 +174,6 @@ class anaplanImport(object):
         # Get the taskId
         jsonResponse = json.loads(response.content)
         taskId = jsonResponse["task"]["taskId"]
-        print(taskId)
         return taskId
 
     @classmethod
@@ -207,7 +182,6 @@ class anaplanImport(object):
         # This function monitors the status of Anaplan action. Once complete it returns
         # the JSON text of the response.
         # ===========================================================================
-        print("entering loop")
         post_header = {'Authorization': 'AnaplanAuthToken %s' % token, 'Content-Type': 'application/json'}
         while True:
             try:
@@ -216,7 +190,6 @@ class anaplanImport(object):
                     urlStem + "/workspaces/" + wsId + "/models/" + modelId + "/imports/" + importId + "/tasks/" + taskId,
                     headers=headers)
                 get_status.raise_for_status()
-                print(get_status)
             except HTTPError as e:
                 raise HTTPError(e)
             status = json.loads(get_status.text)
@@ -235,14 +208,12 @@ def parse_task_response(results, token, wsId, modelId, importId, taskId, post_he
     '''
     :param results: JSON dump of the results of an Anaplan action
     '''
-    print("13.1 - Status being Retrieved:")
     job_status = results["currentStep"]
-    print(job_status)
+#    print(job_status)
     failure_alert = str(results["result"]["failureDumpAvailable"])
-
     if job_status == "Failed.":
         error_message = str(results["result"]["details"][0]["localMessageText"])
-        print("The task has failed to run due to an error: " + error_message)
+#        print("The task has failed to run due to an error: " + error_message)
         return "The task has failed to run due to an error: " + error_message
     else:
         if failure_alert == "True":
@@ -276,10 +247,10 @@ def parse_task_response(results, token, wsId, modelId, importId, taskId, post_he
                         anaplan_process_dump += report
                         failure_details = failure_details + local_message
             if anaplan_process_dump != "":
-                print("The requested job is " + job_status)
+#                print("The requested job is " + job_status)
                 return load_detail + '\n' + "Details:" + '\n' + error_detail + '\n' + "Failure dump(s):" + '\n' + anaplan_process_dump
             else:
-                print("The requested job is " + job_status)
+#                print("The requested job is " + job_status)
                 return load_detail
         else:
             if "details" in results["result"]:
@@ -293,10 +264,10 @@ def parse_task_response(results, token, wsId, modelId, importId, taskId, post_he
                     for i in results["result"]["details"][0]["values"]:
                         load_detail = load_detail + i + '\n'
                     if failure_alert == "True":
-                        print("The requested job is " + job_status)
+#                        print("The requested job is " + job_status)
                         return "Failure Dump Available: " + failure_alert + ", Successful: " + success_report + '\n' + "Load details:" + '\n' + load + '\n' + load_detail + '\n' + "Failure dump:" + '\n' + dump
                     else:
-                        print("The requested job is " + job_status)
+#                        print("The requested job is " + job_status)
                         return "Failure Dump Available: " + failure_alert + ", Successful: " + success_report + '\n' + "Load details:" + '\n' + load + '\n' + load_detail
 
 def convertbase64(connectString):

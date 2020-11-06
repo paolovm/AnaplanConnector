@@ -265,7 +265,6 @@ def run_action(url, post_header, retryCount):
 
     state = 0
     sleepTime = 10
-    print("run action started")
     while True:
         try:
             run_action = requests.post(url, headers=post_header, json=__post_body__)
@@ -322,12 +321,12 @@ def execute_action_with_parameters(conn, actionId, retryCount, **params):
                 }
     
     if actionId[:3] == "112":
-        print("Running action " + actionId)
+#        print("Running action " + actionId)
         url = __base_url__ + "/" +workspaceGuid + "/models/" + modelGuid + "/imports/" + actionId + "/tasks"
         taskId = run_action_with_parameters(url, post_header, retryCount, post_body)
         return check_status(url, taskId, post_header)
     elif actionId[:3] == "118":
-        print("Running action " + actionId)
+#        print("Running action " + actionId)
         url = __base_url__ + "/" +workspaceGuid + "/models/" + modelGuid + "/processes/" + actionId + "/tasks"
         #taskId = run_action_with_parameters(url, post_header, retryCount, post_body)
         taskId = run_action(url, post_header, retryCount)
@@ -451,10 +450,10 @@ def parse_task_response(results, url, taskId, post_header):
                         anaplan_process_dump += report  
                         failure_details = failure_details + local_message      
             if anaplan_process_dump != "":
-                print("The requested job is " + job_status)
+                #print("The requested job is " + job_status)
                 return load_detail + '\n' + "Details:" + '\n' + error_detail + '\n' + "Failure dump(s):" + '\n' + anaplan_process_dump
             else:
-                print("The requested job is " + job_status)
+                #print("The requested job is " + job_status)
                 return load_detail
         else:
             if "details" in results["result"]:
@@ -468,10 +467,10 @@ def parse_task_response(results, url, taskId, post_header):
                     for i in results["result"]["details"][0]["values"]:
                         load_detail = load_detail + i + '\n'
                     if failure_alert == "True":
-                        print("The requested job is " + job_status)
+                        #print("The requested job is " + job_status)
                         return "Failure Dump Available: " + failure_alert + ", Successful: " + success_report + '\n' + "Load details:" + '\n' + load + '\n' + load_detail + '\n' + "Failure dump:" + '\n' + dump
                     else:
-                        print("The requested job is " + job_status)
+                        #print("The requested job is " + job_status)
                         return "Failure Dump Available: " + failure_alert + ", Successful: " + success_report + '\n' + "Load details:" + '\n' + load + '\n' + load_detail
 
 #===========================================================================
