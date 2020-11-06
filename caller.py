@@ -8,13 +8,15 @@ pwd = "Number28"
 
 
 # DEFINIR RELACAO IMPORT/ARQUIVOS EM PARES PARA EXECUTAR A MAIN EM LOOP
-importList = {"Asset Price from quotes.csv": "quotes.csv"}
+importList = {"Asset Price from quotes.csv": "Dados/quotes.csv"}
 
 # Lista de Processes a serem executados com nome assim como na tab de actions do Anaplan
 processName = ["Testing Process"]
 # "Testing Process 2"]
 
 # funcao para Import de arquivo
+
+
 def singleFileImport(conn, importName, fileLocation):
     with open(fileLocation, "rt") as f:
         data_content = f.read()
