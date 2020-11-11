@@ -274,5 +274,3 @@ def convertbase64(connectString):
     cred64 = base64.b64encode(bytes(connectString, 'UTF-8')).decode('utf-8')
     return cred64
 
-def sendstatus(destinatarios,status):
-    send = sendemail.sendEmail()
