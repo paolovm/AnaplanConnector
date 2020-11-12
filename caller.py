@@ -3,7 +3,7 @@ from child import anaplanImport as anaplan
 
 # Credenciais para acessar o Anaplan
 model = "Planning"
-user = "paolovm3@yahoo.com.br"
+user = "paolo.malafaia@flexthink.com.au"
 pwd = "Number28"
 
 
