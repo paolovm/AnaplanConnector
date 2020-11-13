@@ -2,16 +2,16 @@
 from child import anaplanImport as anaplan
 
 # Credenciais para acessar o Anaplan
-model = "Planning"
+model = "PLANNING DEV"
 user = "paolo.malafaia@flexthink.com.au"
 pwd = "Number28"
-
+folder = "D:/Planning-LOC/PYTHON/Dados/"
 
 # DEFINIR RELACAO IMPORT/ARQUIVOS EM PARES PARA EXECUTAR A MAIN EM LOOP
-importList = {"Asset Price from quotes.csv": "Dados/quotes.csv"}
+importList = {"I_List_CST_Maquinas": folder+"MAQUINAS.CSV","I_Dados_MAP.032.CST_Maquinas": folder+"MAQUINAS.CSV"}
 
 # Lista de Processes a serem executados com nome assim como na tab de actions do Anaplan
-processName = ["Testing Process"]
+processName = []
 # "Testing Process 2"]
 
 # funcao para Import de arquivo

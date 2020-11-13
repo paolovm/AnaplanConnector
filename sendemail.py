@@ -14,11 +14,12 @@ def sendEmail(subject="Anaplan Status Non Defined",status="Unspecified Error"):
     msg['Subject'] = subject
     msg['From'] = sender
     msg['To'] = receivers
-    with smtplib.SMTP('localhost', port) as server:
+ #   with smtplib.SMTP('localhost', port) as server:
 #    with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
 #        server.login("paolovm@gmail.com", password)
-        server.sendmail(sender, receivers, msg.as_string())
-        print("Successfully sent email")
+  #      server.sendmail(sender, receivers, msg.as_string())
+    print(MIMEText(status))
+    print("Successfully sent email")
 
 if __name__ == '__main__':
     sendEmail()
