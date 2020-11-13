@@ -1,23 +1,9 @@
 # Importando outras bibliotecas do Python
-from caller import caller
-
-# Credenciais para acessar o Anaplan
-model = "PLANNING DEV"
-user = "paolo.malafaia@flexthink.com.au"
-pwd = "Number28"
-folder = "D:/Planning-LOC/PYTHON/Dados/"
-
-# DEFINIR RELACAO IMPORT/ARQUIVOS EM PARES PARA EXECUTAR A MAIN EM LOOP
-importList = {"I_List_CST_Maquinas": folder+"MAQUINAS.CSV","I_Dados_MAP.032.CST_Maquinas": folder+"MAQUINAS.CSV"}
-
-# Lista de Processes a serem executados com nome assim como na tab de actions do Anaplan
-processName = []
-# "Testing Process 2"]
-
-# funcao para Import de arquivo
+from child import anaplanImport as anaplan
 
 
-def importSequence(conn, importName, fileLocation):
+
+def singleFileImport(conn, importName, fileLocation):
     with open(fileLocation, "rt") as f:
         data_content = f.read()
     f.close()
@@ -25,14 +11,20 @@ def importSequence(conn, importName, fileLocation):
     anaplanImport = anaplan().executeImport(conn, importName, data_content)
 #    print("999 - Import Complete")
 
+
+
+
 # funcao para execucao de processo
-def processSequence(conn, processName):
+def singleProcessExecution(conn, processName):
     # execucao do subprocesso de import
     anaplanImport = anaplan().executeProcess(conn, processName)
 #    print("999 - Process Complete")
 
 
-def main():
+
+
+def main(user, pwd, model, importList, processName):
+    print("running main"+user+pwd+model)
     try:
         # conectar ao Anaplan
         conn= anaplan().connectToAnaplanModel(user, pwd, model)

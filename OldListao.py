@@ -1,5 +1,5 @@
 # Importando outras bibliotecas do Python
-from child import anaplanImport as anaplan
+from Oldcaller import caller
 
 # Credenciais para acessar o Anaplan
 model = "PLANNING DEV"
@@ -17,7 +17,7 @@ processName = []
 # funcao para Import de arquivo
 
 
-def singleFileImport(conn, importName, fileLocation):
+def importSequence(conn, importName, fileLocation):
     with open(fileLocation, "rt") as f:
         data_content = f.read()
     f.close()
@@ -26,7 +26,7 @@ def singleFileImport(conn, importName, fileLocation):
 #    print("999 - Import Complete")
 
 # funcao para execucao de processo
-def singleProcessExecution(conn, processName):
+def processSequence(conn, processName):
     # execucao do subprocesso de import
     anaplanImport = anaplan().executeProcess(conn, processName)
 #    print("999 - Process Complete")
