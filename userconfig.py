@@ -10,10 +10,10 @@ pwd = "Number28"
 # importlist = dicionario com nome do import + arquivo base
 # processlist = lista de processos
 folder = "Dados/"
-importList = {"Asset Price from quotes.csv": folder+"quotes.csv"}
+#importList = {"Asset Price from quotes.csv": folder+"quotes.csv"}
 #importList = {"Asset Price from quotes.csv": None}
-processName = []
-
+importList = {}
+processName = {"Testing Process":[{"Version":"Actual"}]}
 
 # Execucao do script
 def main():

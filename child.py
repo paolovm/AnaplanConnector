@@ -62,7 +62,7 @@ class anaplanImport(object):
 #        print(checkStatusImport)
 
     @classmethod
-    def executeProcess(cls, conn, processName):
+    def executeProcess(cls, conn, processName, **params):
         tokenValue = conn.authorization
         workspaceId = conn.workspaceGuid
         modelId = conn.modelGuid
@@ -73,7 +73,7 @@ class anaplanImport(object):
         print("PROC002 - Import ID retrieved. See below:")
         # # Trigger the import
         print("PROC003 - Executing the Process")
-        executeImport = anaplanLib.execute_action_with_parameters(conn, processId, 3)
+        executeImport = anaplanLib.execute_action_with_parameters(conn, processId, 3, **params)
         print("PROC004 - Process Executed")
         # # Get the status of the import
         emailSubject = "Anaplan Execution - " + processName

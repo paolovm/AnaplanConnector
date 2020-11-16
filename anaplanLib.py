@@ -4,13 +4,14 @@
 # Description:    This library implements the Anaplan API to get lists of model resources, upload files to Anaplan server, 
 #                 download files from Anaplan server, and execute actions.
 #===============================================================================
-
+#import requests_debugger
 import requests
 import json
 import os
 #import anaplan_auth
 from time import sleep
 from requests.exceptions import HTTPError
+import urllib
 
 #===============================================================================
 # Defining global variables
@@ -302,34 +303,31 @@ def execute_action_with_parameters(conn, actionId, retryCount, **params):
     authorization = conn.authorization
     workspaceGuid = conn.workspaceGuid
     modelGuid = conn.modelGuid
-    
+
     post_header = {'Authorization': 'AnaplanAuthToken %s' % authorization, 'Content-Type': 'application/json'}
-    
     body = ""
     if len(params) > 1:
         for key, value in params.items():
-            body += "\"entityType:\"" + key + "\"" + ",\"entityType:\"" + value + "\"" + ","
+            body += "\'entityType:\'" + key + "\'" + ",\"entityName:\'" + value + "\'" + ","
         body = body[:-1]
-        body = "[" + body + "]"
+        body = "{" + body + "}"
     else:
         for key, value in params.items():
-            body += "[\"" + key + "\"" + ":" + "\"" + value + "\"]"
-    
-    
-    post_body = {
-                    "localeName":"en_US","mappingParameters": body
-                }
-    
+#            body += "{\"entityType\":\"" + key + "\"" + ","+ "\"entityName\":\"" + value + "\"}"
+            paramsbody = {'entityType': key, 'entityName': value}
+
+            post_body = {'localeName': 'en_US'}
+            post_body['mappingParameters']= [paramsbody]
     if actionId[:3] == "112":
-#        print("Running action " + actionId)
+        print("Running action " + actionId)
         url = __base_url__ + "/" +workspaceGuid + "/models/" + modelGuid + "/imports/" + actionId + "/tasks"
         taskId = run_action_with_parameters(url, post_header, retryCount, post_body)
         return check_status(url, taskId, post_header)
     elif actionId[:3] == "118":
-#        print("Running action " + actionId)
+        print("Running action " + actionId)
         url = __base_url__ + "/" +workspaceGuid + "/models/" + modelGuid + "/processes/" + actionId + "/tasks"
-        #taskId = run_action_with_parameters(url, post_header, retryCount, post_body)
-        taskId = run_action(url, post_header, retryCount)
+        taskId = run_action_with_parameters(url, post_header, retryCount, post_body)
+        #taskId = run_action(url, post_header, retryCount)
         return check_status(url, taskId, post_header)
     else:
         print("Incorrect action ID provided! Only imports and processes may be executed with parameters.")
@@ -345,35 +343,27 @@ def run_action_with_parameters(url, post_header, retryCount, post_body):
     @param post_header: Authorization header string
     @param retryCount: Number of times to retry executino of the action
     '''
-    print("run action started")
     state = 0
     sleepTime = 10
-        
     while True:
         try:
-            print("im trying")
-            print(url,post_header,post_body)
             run_action = requests.post(url, headers=post_header, json=post_body)
-            print("post done")
-            print(run_action)
             run_action.raise_for_status()
-            print("status raised")
         except HTTPError as e:
             raise HTTPError(e)
         if run_action.status_code != 200 and state < retryCount:
             sleep(sleepTime)
             try:
-                run_import = requests.post(url, headers=post_header, json=post_body)
-                run_import.raise_for_status()
+                run_action = requests.post(url, headers=post_header, json=post_body)
+                run_action.raise_for_status()
             except HTTPError as e:
                 raise HTTPError(e)
             state += 1
             sleepTime = sleepTime * 1.5
         else:
             break
-    print("loop finished")
-    taskId = json.loads(run_import.text)
-    
+    taskId = json.loads(run_action.text)
+    taskId = taskId["task"]
     return taskId["taskId"]
 
 #===========================================================================

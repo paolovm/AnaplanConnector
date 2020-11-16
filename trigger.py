@@ -17,9 +17,9 @@ def singleFileImport(conn, importName, fileLocation):
 
 
 # funcao para execucao de processo
-def singleProcessExecution(conn, processName):
-    # execucao do subprocesso de import
-    anaplanImport = anaplan().executeProcess(conn, processName)
+def singleProcessExecution(conn, processName, **params):
+    # execucao do subprocesso de import.
+    anaplanImport = anaplan().executeProcess(conn, processName, **params)
 #    print("999 - Process Complete")
 
 
@@ -34,8 +34,8 @@ def main(user, pwd, model, importList, processName):
         for importAction, importFile in importList.items():
             singleFileImport(conn, importAction, importFile)
         # execucao de processes
-        for each_process in processName:
-            singleProcessExecution(conn, each_process)
+        for processAction, processParams in processName.items():
+            singleProcessExecution(conn, processAction, Version="Actual")
     except:
         print("998 - An exception occurred.")
 
