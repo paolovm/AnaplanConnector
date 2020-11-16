@@ -11,6 +11,7 @@ pwd = "Number28"
 # processlist = lista de processos
 folder = "Dados/"
 importList = {"Asset Price from quotes.csv": folder+"quotes.csv"}
+#importList = {"Asset Price from quotes.csv": None}
 processName = []
 
 

@@ -4,10 +4,12 @@ from child import anaplanImport as anaplan
 
 
 def singleFileImport(conn, importName, fileLocation):
-    with open(fileLocation, "rt") as f:
-        data_content = f.read()
-    f.close()
-    # execucao do subprocesso de import
+    data_content=None
+    if (fileLocation != None):
+        with open(fileLocation, "rt") as f:
+            data_content = f.read()
+        f.close()
+        # execucao do subprocesso de import
     anaplanImport = anaplan().executeImport(conn, importName, data_content)
 #    print("999 - Import Complete")
 

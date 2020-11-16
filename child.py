@@ -41,9 +41,12 @@ class anaplanImport(object):
         importId = importInfos[0]
         datasourceId = importInfos[1]
         # Send the data to Anaplan to update datasource
-        print("IMPORT003 - Sending the data to Anaplan")
-        sendData = cls.sendData(tokenValue, workspaceId, modelId, datasourceId, 1, contentToSend)
-        print("IMPORT004 - Data Sent")
+        print("IMPORT003 - Evaluating data to send to Anaplan")
+        if (contentToSend != None):
+            sendData = cls.sendData(tokenValue, workspaceId, modelId, datasourceId, 1, contentToSend)
+            print("IMPORT004 - Data Sent")
+        else:
+            print("IMPORT004 - No Data to send")
         # # Trigger the import
         print("IMPORT005 - Executing the Import")
         executeImport = cls.importTrigger(tokenValue, workspaceId, modelId, importId)
