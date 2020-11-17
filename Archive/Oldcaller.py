@@ -1,5 +1,5 @@
 # Importando outras bibliotecas do Python
-from child import anaplanImport as anaplan
+from anaplanTools import anaplanImport as anaplan
 
 # Credenciais para acessar o Anaplan
 model = "PLANNING DEV"

@@ -1,5 +1,5 @@
 # Importando outras bibliotecas do Python
-from child import anaplanImport as anaplan
+from anaplanTools import anaplanImport as anaplan
 
 
 
@@ -18,7 +18,7 @@ def singleFileImport(conn, importName, fileLocation):
 
 # funcao para execucao de processo
 def singleProcessExecution(conn, processName, **params):
-    print("trigger.py: ", params)
+    print("executionControl.py: ", params)
     # execucao do subprocesso de import.
     anaplanImport = anaplan().executeProcess(conn, processName, **params)
 #    print("999 - Process Complete")

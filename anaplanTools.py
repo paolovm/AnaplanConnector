@@ -4,7 +4,7 @@ from requests.exceptions import HTTPError
 import json
 import anaplanLib
 import sendemail
-from AnaplanConnection import AnaplanConnection
+from anaplanConnection import AnaplanConnection
 
 urlAuth = "https://auth.anaplan.com/token/authenticate"
 urlStem = "https://api.anaplan.com/2/0"
