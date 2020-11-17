@@ -18,6 +18,7 @@ def singleFileImport(conn, importName, fileLocation):
 
 # funcao para execucao de processo
 def singleProcessExecution(conn, processName, **params):
+    print("trigger.py: ", params)
     # execucao do subprocesso de import.
     anaplanImport = anaplan().executeProcess(conn, processName, **params)
 #    print("999 - Process Complete")
@@ -25,7 +26,7 @@ def singleProcessExecution(conn, processName, **params):
 
 
 
-def main(user, pwd, model, importList, processName):
+def main(user, pwd, model, importList, processName, **params):
     print("running main"+user+pwd+model)
     try:
         # conectar ao Anaplan
@@ -35,7 +36,9 @@ def main(user, pwd, model, importList, processName):
             singleFileImport(conn, importAction, importFile)
         # execucao de processes
         for processAction, processParams in processName.items():
-            singleProcessExecution(conn, processAction, Version="Actual")
+            #singleProcessExecution(conn, processAction, ** params)
+            print(processParams)
+            singleProcessExecution(conn, processAction, Version="Actual" , Period="Aug 20")
     except:
         print("998 - An exception occurred.")
 

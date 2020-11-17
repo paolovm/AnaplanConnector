@@ -4,7 +4,7 @@
 # Description:    This library implements the Anaplan API to get lists of model resources, upload files to Anaplan server, 
 #                 download files from Anaplan server, and execute actions.
 #===============================================================================
-#import requests_debugger
+import requests_debugger
 import requests
 import json
 import os
@@ -305,19 +305,26 @@ def execute_action_with_parameters(conn, actionId, retryCount, **params):
     modelGuid = conn.modelGuid
 
     post_header = {'Authorization': 'AnaplanAuthToken %s' % authorization, 'Content-Type': 'application/json'}
-    body = ""
+    post_body = {'localeName': 'en_US'}
+
+
+
+    print("anaplanLib row309:", params)
     if len(params) > 1:
+        paramsbody = []
         for key, value in params.items():
-            body += "\'entityType:\'" + key + "\'" + ",\"entityName:\'" + value + "\'" + ","
-        body = body[:-1]
-        body = "{" + body + "}"
+            paramstemp = {'entityType': key, 'entityName': value}
+            paramsbody.append(paramstemp)
     else:
         for key, value in params.items():
 #            body += "{\"entityType\":\"" + key + "\"" + ","+ "\"entityName\":\"" + value + "\"}"
-            paramsbody = {'entityType': key, 'entityName': value}
+            paramsbody = [{'entityType': key, 'entityName': value}]
 
-            post_body = {'localeName': 'en_US'}
-            post_body['mappingParameters']= [paramsbody]
+    print(paramsbody)
+    post_body['mappingParameters']= paramsbody
+
+
+
     if actionId[:3] == "112":
         print("Running action " + actionId)
         url = __base_url__ + "/" +workspaceGuid + "/models/" + modelGuid + "/imports/" + actionId + "/tasks"
@@ -326,6 +333,7 @@ def execute_action_with_parameters(conn, actionId, retryCount, **params):
     elif actionId[:3] == "118":
         print("Running action " + actionId)
         url = __base_url__ + "/" +workspaceGuid + "/models/" + modelGuid + "/processes/" + actionId + "/tasks"
+        print(post_body)
         taskId = run_action_with_parameters(url, post_header, retryCount, post_body)
         #taskId = run_action(url, post_header, retryCount)
         return check_status(url, taskId, post_header)

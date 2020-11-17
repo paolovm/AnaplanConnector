@@ -13,7 +13,7 @@ folder = "Dados/"
 #importList = {"Asset Price from quotes.csv": folder+"quotes.csv"}
 #importList = {"Asset Price from quotes.csv": None}
 importList = {}
-processName = {"Testing Process":[{"Version":"Actual"}]}
+processName = {"Testing Process":[{"Version":"Actual","Period":"Aug 20"}]}
 
 # Execucao do script
 def main():
