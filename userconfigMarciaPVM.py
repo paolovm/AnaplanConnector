@@ -26,16 +26,17 @@ folder = "Dados/"
 # ["I_Dados_EBT.100.EBITDA - Real",None, {"Line Item":"Valor Realizado Pós Rateio"}]
 #      ]
 
-importList = []
+importList = [["I_Dados_MAP.002.UN Resultado", None, {}]]
 # ----------- DEFINICAO DE IMPORT -----------
 
 
 
 
 # ----------- DEFINICAO DE PROCESSOS ---------
-processList=[]
 
-processList=[["Carga Centro de Custo e Unidades", {}]]
+
+#processList=[["Carga Centro de Custo e Unidades", {}]]
+processList=[]
 # ----------- DEFINICAO DE PROCESSOS -----------
 
 

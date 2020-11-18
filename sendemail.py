@@ -1,24 +1,31 @@
 import smtplib, ssl
+from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
 
 def sendEmail(subject="Anaplan Status Non Defined",status="Unspecified Error"):
-    sender = 'paolovm@gmail.com'
-#    receivers = ['jvictor@ctiglobal.com;paolo.malafaia@flexthink.com.au']
-    receivers='paolovm@gmail.com'
-    port=1025
-#    port = 465
+    receivers="paolovm@gmail.com,marcia_borges@fornodeminas.com.br"
 
+    sender = 'fdmplanning@gmail.com'
+    password = 'Fdmpla2021'
+
+    port=1025
+    port = 465
     context = ssl.create_default_context()
-    password = ''
-    msg = MIMEText(status)
+
+    msg = MIMEMultipart()
     msg['Subject'] = subject
     msg['From'] = sender
     msg['To'] = receivers
- #   with smtplib.SMTP('localhost', port) as server:
-#    with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
-#        server.login("paolovm@gmail.com", password)
-  #      server.sendmail(sender, receivers, msg.as_string())
-    print(MIMEText(status))
+    msg.attach(MIMEText(status))
+
+#    with smtplib.SMTP('localhost', port) as server:
+    with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
+        pass
+        #server.login("paolovm@gmail.com", password)
+        #server.sendmail(sender, receivers, msg.as_string())
+
+    print(status)
     print("Successfully sent email")
 
 if __name__ == '__main__':
