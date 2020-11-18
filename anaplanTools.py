@@ -30,7 +30,7 @@ class anaplanImport(object):
         return conn
 
     @classmethod
-    def executeImport(cls, conn, importFile, contentToSend, **params):
+    def executeImport(cls, conn, importFile, contentToSend, params):
         tokenValue = conn.authorization
         workspaceId = conn.workspaceGuid
         modelId = conn.modelGuid
@@ -49,7 +49,10 @@ class anaplanImport(object):
             print("IMPORT004 - No Data to send")
         # # Trigger the import
         print("IMPORT005 - Executing the Import")
-        executeImport = cls.importTrigger(tokenValue, workspaceId, modelId, importId, **params)
+        if params==None:
+            executeImport = cls.importTrigger(tokenValue, workspaceId, modelId, importId, None)
+        else:
+            executeImport = cls.importTrigger(tokenValue, workspaceId, modelId, importId, **params)
         print("IMPORT006 - Import Triggered")
         # # Get the status of the import
         print("IMPORT007 - Checking status of import")
