@@ -3,14 +3,14 @@ from anaplanTools import anaplanImport as anaplan
 
 
 
-def singleFileImport(conn, importName, fileLocation):
+def singleFileImport(conn, importName, fileLocation, **params):
     data_content=None
     if (fileLocation != None):
-        with open(fileLocation, "rt") as f:
+        with open(fileLocation, "rt",encoding="latin-1") as f:
             data_content = f.read()
         f.close()
         # execucao do subprocesso de import
-    anaplanImport = anaplan().executeImport(conn, importName, data_content)
+    anaplanImport = anaplan().executeImport(conn, importName, data_content, **params)
 #    print("999 - Import Complete")
 
 
@@ -26,25 +26,23 @@ def singleProcessExecution(conn, processName, **params):
 
 
 
-def main(user, pwd, model, importList, processName, **params):
-    print("running main"+user+pwd+model)
+def main(user, pwd, model, importList, processList):
     try:
         # conectar ao Anaplan
         conn= anaplan().connectToAnaplanModel(user, pwd, model)
         # execucao de imports
-        for importAction, importFile in importList.items():
-            singleFileImport(conn, importAction, importFile)
+        for eachImport in importList:
+            importAction=eachImport[0]
+            importFile = eachImport[1]
+            importParams = eachImport[2]
+            singleFileImport(conn, importAction, importFile , **importParams)
         # execucao de processes
-        for processAction, processParams in processName.items():
-            #singleProcessExecution(conn, processAction, ** params)
-            print(processParams)
-            singleProcessExecution(conn, processAction, Version="Actual" , Period="Aug 20")
+        for eachprocess in processList:
+            processAction = eachprocess[0]
+            processParams = eachprocess[1]
+            singleProcessExecution(conn, processAction, **processParams)
     except:
         print("998 - An exception occurred.")
 
-
-
-if __name__ == '__main__':
-    main()
 
 

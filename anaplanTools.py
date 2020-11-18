@@ -30,7 +30,7 @@ class anaplanImport(object):
         return conn
 
     @classmethod
-    def executeImport(cls, conn, importFile, contentToSend):
+    def executeImport(cls, conn, importFile, contentToSend, **params):
         tokenValue = conn.authorization
         workspaceId = conn.workspaceGuid
         modelId = conn.modelGuid
@@ -49,7 +49,7 @@ class anaplanImport(object):
             print("IMPORT004 - No Data to send")
         # # Trigger the import
         print("IMPORT005 - Executing the Import")
-        executeImport = cls.importTrigger(tokenValue, workspaceId, modelId, importId)
+        executeImport = cls.importTrigger(tokenValue, workspaceId, modelId, importId, **params)
         print("IMPORT006 - Import Triggered")
         # # Get the status of the import
         print("IMPORT007 - Checking status of import")
@@ -131,17 +131,19 @@ class anaplanImport(object):
             urlStem + "/workspaces/" + wsId + "/models/" + modelId + "/processes",
             headers=headers
         )
+
         jsonResponse = json.loads(response.content)
         processesArray = jsonResponse["processes"]
         processesInfo = [processInfo for processInfo in processesArray if processInfo['name'] == processName]
         processId = processesInfo[0]["id"]
+
         return processId
 
     @classmethod
     def sendData(cls, token, wsId, modelId, fileId, chunkCount, content):
         # Send the data to Anaplan to update datasource
         ## First, tell Anaplan API's server it will receive one chunk
-        #print("009.1 - Telling Anaplan it will receive one chunk")
+        print("009.1 - Telling Anaplan it will receive one chunk")
         headers = {'Authorization': 'AnaplanAuthToken %s' % token, 'Content-Type': 'application/json'}
         data = json.dumps({'id': fileId, "chunkCount": chunkCount})
         response = requests.post(
@@ -149,10 +151,10 @@ class anaplanImport(object):
             headers=headers,
             data=data
         )
-        #print("009.2 - Told Anaplan it will receive one chunk")
+        print("009.2 - Told Anaplan it will receive one chunk")
         ## Now let's send the file
         headers2 = {'Authorization': 'AnaplanAuthToken %s' % token, 'Content-Type': 'application/octet-stream'}
-        #print("009.3 - Put command starting")
+        print("009.3 - Put command starting")
         response2 = requests.put(
             urlStem + "/workspaces/" + wsId + "/models/" + modelId + "/files/" + fileId + "/chunks/" + str(
             chunkCount - 1)
@@ -160,15 +162,33 @@ class anaplanImport(object):
             headers=headers2,
             data=content
         )
-        #print("009.4 - Put command finished")
+        print("009.4 - Put command finished")
         status_code = response2.status_code
         return status_code
 
     @classmethod
-    def importTrigger(cls, token, wsId, modelId, importId):
+    def importTrigger(cls, token, wsId, modelId, importId, **params):
+        # adding post body/parameters:
+        post_body = {'localeName': 'en_US'}
+
+        if params == None:
+            pass
+        elif len(params) > 1:
+            paramsbody = []
+            for key, value in params.items():
+                paramstemp = {'entityType': key, 'entityName': value}
+                paramsbody.append(paramstemp)
+        else:
+            for key, value in params.items():
+                #            body += "{\"entityType\":\"" + key + "\"" + ","+ "\"entityName\":\"" + value + "\"}"
+                paramsbody = [{'entityType': key, 'entityName': value}]
+
+
+        post_body['mappingParameters'] = paramsbody
+
         # Finally we trigger the import
         headers = {'Authorization': 'AnaplanAuthToken %s' % token, 'Content-Type': 'application/json'}
-        data = json.dumps({'localeName': "en_US"})
+        data = json.dumps(post_body)
         response = requests.post(
             urlStem + "/workspaces/" + wsId + "/models/" + modelId + "/imports/" + importId + "/tasks/",
             headers=headers,

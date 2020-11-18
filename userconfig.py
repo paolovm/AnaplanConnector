@@ -10,17 +10,31 @@ pwd = "Number28"
 folder = "Dados/"
 
 ####### DEFINICAO DE IMPORT #######
-# importlist = dicionario com nome do import + arquivo base
-#importList = {"Asset Price from quotes.csv": folder+"quotes.csv"}
-#importList = {"Asset Price from quotes.csv": None}
-importList = {}
+# importlist = cada import eh uma lista com IMPORT NAME , ARQUIVO , PARAMETROS
+# importList =\
+#     [
+#     ["I_Dados_STG.700.Carga Mg de Mkt PIS Embutido", folder+"mm.txt", [{"Line Item":"Valor Actual"}]],
+#     ["I_Dados_STG.700.Carga Mg de Mkt PIS Zero",None, [{"Line Item":"Valor Actual"}]],
+#     ["I_Dados_REC.200.Margem de Mercado - Real Base",None, [{"Line Item":"Valor Actual"}]],
+#     ["I_Dados_REC.200.Margem de Mercado - Real PIS/Cofins",None, [{"Line Item":"Valor Actual"}]]
+#     ]
+
+# importList =\
+# [
+# ["Asset Price from quotes.csv", folder+"quotes.csv", None],
+# ["Asset Price from quotes.csv", folder+"quotes.csv", None]
+# ]
+importList=[]
 ####### DEFINICAO DE IMPORT #######
 
 
 ####### DEFINICAO DE PROCESSOS #######
 # processlist = lista de processos
-#processName = {"Testing Process":[{"Version":"Actual","Period":"Aug 20"}]}
-processName = {"Testing Process 2":None}
+processName =\
+[
+["Testing Process 2",{"Version":"Actual","Period":"Aug 20"}]
+]
+#processName = {"Testing Process 2":None}
 ####### DEFINICAO DE PROCESSOS #######
 
 
