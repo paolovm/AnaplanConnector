@@ -307,18 +307,19 @@ def execute_action_with_parameters(conn, actionId, retryCount, **params):
     post_header = {'Authorization': 'AnaplanAuthToken %s' % authorization, 'Content-Type': 'application/json'}
     post_body = {'localeName': 'en_US'}
 
-
-    if len(params) > 1:
+    if len(params) == 0:
+        pass
+    elif len(params) > 1:
         paramsbody = []
         for key, value in params.items():
             paramstemp = {'entityType': key, 'entityName': value}
             paramsbody.append(paramstemp)
+        post_body['mappingParameters'] = paramsbody
     else:
         for key, value in params.items():
-#            body += "{\"entityType\":\"" + key + "\"" + ","+ "\"entityName\":\"" + value + "\"}"
+            #            body += "{\"entityType\":\"" + key + "\"" + ","+ "\"entityName\":\"" + value + "\"}"
             paramsbody = [{'entityType': key, 'entityName': value}]
-
-    post_body['mappingParameters']= paramsbody
+        post_body['mappingParameters'] = paramsbody
 
     if actionId[:3] == "112":
         print("Running action " + actionId)

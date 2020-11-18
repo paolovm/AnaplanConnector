@@ -3,7 +3,7 @@ from anaplanTools import anaplanImport as anaplan
 
 
 
-def singleFileImport(conn, importName, fileLocation, params):
+def singleFileImport(conn, importName, fileLocation, **params):
     print("execution control 7")
     data_content=None
     if (fileLocation != None):
@@ -11,7 +11,7 @@ def singleFileImport(conn, importName, fileLocation, params):
             data_content = f.read()
         f.close()
         # execucao do subprocesso de import
-    anaplanImport = anaplan().executeImport(conn, importName, data_content, params)
+    anaplanImport = anaplan().executeImport(conn, importName, data_content, **params)
 #    print("999 - Import Complete")
 
 
@@ -19,7 +19,6 @@ def singleFileImport(conn, importName, fileLocation, params):
 
 # funcao para execucao de processo
 def singleProcessExecution(conn, processName, **params):
-    print("executionControl.py: ", params)
     # execucao do subprocesso de import.
     anaplanImport = anaplan().executeProcess(conn, processName, **params)
 #    print("999 - Process Complete")
@@ -36,10 +35,7 @@ def main(user, pwd, model, importList, processList):
             importAction=eachImport[0]
             importFile = eachImport[1]
             importParams = eachImport[2]
-            print(importAction)
-            print(importFile)
-            print(importParams)
-            singleFileImport(conn, importAction, importFile , importParams)
+            singleFileImport(conn, importAction, importFile , **importParams)
         # execucao de processes
         for eachprocess in processList:
             processAction = eachprocess[0]

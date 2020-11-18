@@ -30,35 +30,32 @@ class anaplanImport(object):
         return conn
 
     @classmethod
-    def executeImport(cls, conn, importFile, contentToSend, params):
+    def executeImport(cls, conn, importFile, contentToSend, **params):
         tokenValue = conn.authorization
         workspaceId = conn.workspaceGuid
         modelId = conn.modelGuid
         # Get the list of imports and choose one with the importId and the datasourceId
-        print ("IMPORT001 - Retrieving the list of imports")
+        print ('IMPORT001 - %s - Retrieving the list of imports' %(importFile))
         importInfos = cls.getImportInfo(tokenValue, workspaceId, modelId, importFile)
-        print ("IMPORT002 - Import and Datasource ID retrieved. See below:")
+        print ("IMPORT002 - %s - Import and Datasource ID retrieved" %(importFile))
         importId = importInfos[0]
         datasourceId = importInfos[1]
         # Send the data to Anaplan to update datasource
-        print("IMPORT003 - Evaluating data to send to Anaplan")
+        print("IMPORT003 - %s - Evaluating data to send to Anaplan" %(importFile))
         if (contentToSend != None):
             sendData = cls.sendData(tokenValue, workspaceId, modelId, datasourceId, 1, contentToSend)
-            print("IMPORT004 - Data Sent")
+            print("IMPORT004 - %s - Data Sent" %(importFile))
         else:
-            print("IMPORT004 - No Data to send")
+            print("IMPORT004 - %s - o Data to send" %(importFile))
         # # Trigger the import
-        print("IMPORT005 - Executing the Import")
-        if params==None:
-            executeImport = cls.importTrigger(tokenValue, workspaceId, modelId, importId, None)
-        else:
-            executeImport = cls.importTrigger(tokenValue, workspaceId, modelId, importId, **params)
-        print("IMPORT006 - Import Triggered")
+        print("IMPORT005 - %s - Executing the Import" %(importFile))
+        executeImport = cls.importTrigger(tokenValue, workspaceId, modelId, importId, **params)
+        print("IMPORT006 - %s - Import Triggered" %(importFile))
         # # Get the status of the import
-        print("IMPORT007 - Checking status of import")
+        print("IMPORT007 - %s - Checking status of import" %(importFile))
         checkStatusImport = cls.check_status(tokenValue, workspaceId, modelId, importId,
                                                   executeImport)
-        print("IMPORT008 - Status Retrieved")
+        print("IMPORT008 - %s - Status Retrieved" %(importFile))
         emailSubject = "Anaplan Execution - " + importFile
         emailText = checkStatusImport
         sendemail.sendEmail(emailSubject,emailText)
@@ -70,14 +67,15 @@ class anaplanImport(object):
         workspaceId = conn.workspaceGuid
         modelId = conn.modelGuid
         # Get the list of imports and choose one with the importId and the datasourceId
-        print("PROC001 - Retrieving the list of imports")
+        print("PROC001 - %s - Retrieving the list of imports" %(processName))
         processInfos = cls.getProcessInfo(tokenValue, workspaceId, modelId, processName)
         processId = processInfos
-        print("PROC002 - Import ID retrieved. See below:")
+        print("PROC002 - %s - Import ID retrieved. See below:" %(processName))
         # # Trigger the import
-        print("PROC003 - Executing the Process")
+        print("PROC003 - %s - Executing the Process" %(processName))
+        print(params)
         executeImport = anaplanLib.execute_action_with_parameters(conn, processId, 3, **params)
-        print("PROC004 - Process Executed")
+        print("PROC004 - %s - Process Executed" %(processName))
         # # Get the status of the import
         emailSubject = "Anaplan Execution - " + processName
         emailText = executeImport
@@ -174,20 +172,20 @@ class anaplanImport(object):
         # adding post body/parameters:
         post_body = {'localeName': 'en_US'}
 
-        if params == None:
+        if len(params) == 0:
             pass
         elif len(params) > 1:
             paramsbody = []
             for key, value in params.items():
                 paramstemp = {'entityType': key, 'entityName': value}
                 paramsbody.append(paramstemp)
+            post_body['mappingParameters'] = paramsbody
         else:
             for key, value in params.items():
                 #            body += "{\"entityType\":\"" + key + "\"" + ","+ "\"entityName\":\"" + value + "\"}"
                 paramsbody = [{'entityType': key, 'entityName': value}]
+            post_body['mappingParameters'] = paramsbody
 
-
-        post_body['mappingParameters'] = paramsbody
 
         # Finally we trigger the import
         headers = {'Authorization': 'AnaplanAuthToken %s' % token, 'Content-Type': 'application/json'}
