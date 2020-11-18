@@ -9,11 +9,11 @@ pwd = "Number28"
 # Configuracoes de arquivos, imports e processes
 folder = "Dados/"
 
-####### DEFINICAO DE IMPORT #######
+# -----------DEFINICAO DE IMPORT -----------
 # importlist = dicionario com nome do import + arquivo base
-# importList = {"Asset Price from quotes.csv": folder+"quotes.csv"}
-# importList = {"Asset Price from quotes.csv": None}
+
 # importList = {"I_List_CST_Maquinas":folder+"MAQUINAS.CSV","I_Dados_MAP.032.CST_Maquinas":None}
+
 # importList =\
 # [
 # ["I_List_CCF4_UN_SKU", folder+"UNxSKU.txt", {}],
@@ -26,21 +26,17 @@ folder = "Dados/"
 # ["I_Dados_EBT.100.EBITDA - Real",None, {"Line Item":"Valor Realizado Pós Rateio"}]
 #      ]
 
-importList =[]
-####### DEFINICAO DE IMPORT #######
+importList = []
+# ----------- DEFINICAO DE IMPORT -----------
 
-####### DEFINICAO DE PROCESSOS #######
-# processlist = lista de processos
-#processName = {"Testing Process":[{"Version":"Actual","Period":"Aug 20"}]}
-#processName = {"Testing Process 2":None}
-####### DEFINICAO DE PROCESSOS #######
-# processlist = lista de processos
-# processList =[]
-#processList =\
-#[
-#["Testing Process 2",{"Version":"Actual","Period":"Aug 20"}]
-#]
+
+
+
+# ----------- DEFINICAO DE PROCESSOS ---------
+processList=[]
+
 processList=[["Carga Centro de Custo e Unidades", {}]]
+# ----------- DEFINICAO DE PROCESSOS -----------
 
 
 # Execucao do script
