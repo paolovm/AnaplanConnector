@@ -1,5 +1,5 @@
 # Importando outras bibliotecas do Python
-import executionControl
+import dataAcquisition
 
 # Credenciais para acessar o Anaplan
 model = "PLANNING DEV"
@@ -38,7 +38,7 @@ processList=[["Carga Centro de Custo e Unidades", {}]]
 # Execucao do script
 def main():
     # execucao caller
-    exec= executionControl.main(user, pwd, model, importList, processList)
+    exec= dataAcquisition.main(user, pwd, model, importList, processList)
 
 
 

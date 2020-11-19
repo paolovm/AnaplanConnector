@@ -1,5 +1,5 @@
 # Importando outras bibliotecas do Python
-import executionControl
+import dataAcquisition
 
 # Credenciais para acessar o Anaplan
 model = "PLANNING DEV"
@@ -54,7 +54,7 @@ processList =[]
 def main():
     try:
         # execucao caller
-        exec= executionControl.main(user, pwd, model, importList, processList)
+        exec= dataAcquisition.main(user, pwd, model, importList, processList)
     except:
         print("998 - An exception occurred.")
 
