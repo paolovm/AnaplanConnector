@@ -27,22 +27,19 @@ def singleProcessExecution(conn, processName, **params):
 
 
 def main(user, pwd, model, importList, processList):
-    try:
-        # conectar ao Anaplan
-        conn= anaplan().connectToAnaplanModel(user, pwd, model)
-        # execucao de imports
-        for eachImport in importList:
-            importAction=eachImport[0]
-            importFile = eachImport[1]
-            importParams = eachImport[2]
-            singleFileImport(conn, importAction, importFile , **importParams)
-        # execucao de processes
-        for eachprocess in processList:
-            processAction = eachprocess[0]
-            processParams = eachprocess[1]
-            singleProcessExecution(conn, processAction, **processParams)
-    except:
-        print("998 - An exception occurred.")
+    # conectar ao Anaplan
+    conn= anaplan().connectToAnaplanModel(user, pwd, model)
+    # execucao de imports
+    for eachImport in importList:
+        importAction=eachImport[0]
+        importFile = eachImport[1]
+        importParams = eachImport[2]
+        singleFileImport(conn, importAction, importFile , **importParams)
+    # execucao de processes
+    for eachprocess in processList:
+        processAction = eachprocess[0]
+        processParams = eachprocess[1]
+        singleProcessExecution(conn, processAction, **processParams)
 
 
 
