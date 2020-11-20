@@ -1,23 +1,24 @@
 # Importando outras bibliotecas do Python
-from Archive.Oldcaller import caller
+from anaplanTools import anaplanImport as anaplan
 
 # Credenciais para acessar o Anaplan
-model = "PLANNING DEV"
-user = "paolo.malafaia@flexthink.com.au"
+model = "Planning"
+user = "paolovm3@yahoo.com.br"
 pwd = "Number28"
-folder = "D:/Planning-LOC/PYTHON/Dados/"
+
 
 # DEFINIR RELACAO IMPORT/ARQUIVOS EM PARES PARA EXECUTAR A MAIN EM LOOP
-importList = {"I_List_CST_Maquinas": folder+"MAQUINAS.CSV","I_Dados_MAP.032.CST_Maquinas": folder+"MAQUINAS.CSV"}
+importList = {"Asset Month Price from sku.csv": 'C:/Users/paolo.malafaia/Dropbox (Personal)/Flexthink\Py Scripts/VigmaPy/sku.csv',
+              "Asset Month Price from ska.csv":'C:/Users/paolo.malafaia/Dropbox (Personal)/Flexthink\Py Scripts/VigmaPy/ska.csv'}
 
 # Lista de Processes a serem executados com nome assim como na tab de actions do Anaplan
-processName = []
+#processName = []
 # "Testing Process 2"]
 
 # funcao para Import de arquivo
 
 
-def importSequence(conn, importName, fileLocation):
+def singleFileImport(conn, importName, fileLocation):
     with open(fileLocation, "rt") as f:
         data_content = f.read()
     f.close()
@@ -26,7 +27,7 @@ def importSequence(conn, importName, fileLocation):
 #    print("999 - Import Complete")
 
 # funcao para execucao de processo
-def processSequence(conn, processName):
+def singleProcessExecution(conn, processName):
     # execucao do subprocesso de import
     anaplanImport = anaplan().executeProcess(conn, processName)
 #    print("999 - Process Complete")
@@ -40,8 +41,8 @@ def main():
         for importAction, importFile in importList.items():
             singleFileImport(conn, importAction, importFile)
         # execucao de processes
-        for each_process in processName:
-            singleProcessExecution(conn, each_process)
+ #       for each_process in processName:
+  #          singleProcessExecution(conn, each_process)
     except:
         print("998 - An exception occurred.")
 
