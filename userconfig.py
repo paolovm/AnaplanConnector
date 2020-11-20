@@ -1,51 +1,47 @@
-# Importando outras bibliotecas do Python
+import sys
+sys.path.insert(1, 'PyTools/')
 import dataAcquisition
 
+
 # Credenciais para acessar o Anaplan
-model = "Planning"
-user = "paolovm3@yahoo.com.br"
+model = "PLANNING DEV"
+user = "paolo.malafaia@flexthink.com.au"
 pwd = "Number28"
 
+
+
 # Configuracoes de arquivos, imports e processes
-folder = "Dados/"
-
-####### DEFINICAO DE IMPORT #######
-# importlist = cada import eh uma lista com IMPORT NAME , ARQUIVO , PARAMETROS
-# importList =\
-#     [
-#     ["I_Dados_STG.700.Carga Mg de Mkt PIS Embutido", folder+"mm.txt", [{"Line Item":"Valor Actual"}]],
-#     ["I_Dados_STG.700.Carga Mg de Mkt PIS Zero",None, [{"Line Item":"Valor Actual"}]],
-#     ["I_Dados_REC.200.Margem de Mercado - Real Base",None, [{"Line Item":"Valor Actual"}]],
-#     ["I_Dados_REC.200.Margem de Mercado - Real PIS/Cofins",None, [{"Line Item":"Valor Actual"}]]
-#     ]
-
-# importList =\
-# [
-# ["Asset Price from quotes.csv", folder+"quotes.csv", None],
-# ["Asset Price from quotes.csv", folder+"quotes.csv", None]
-# ]
-importList=[]
-####### DEFINICAO DE IMPORT #######
+folder = "Data/"
 
 
-####### DEFINICAO DE PROCESSOS #######
-# processlist = lista de processos
-processName =\
-[
-["Testing Process 2",{"Version":"Actual","Period":"Aug 20"}]
-]
-#processName = {"Testing Process 2":None}
-####### DEFINICAO DE PROCESSOS #######
+# -----------DEFINICAO DE IMPORT -----------
+# importlist = dicionario com nome do import + arquivo base
+
+# importList = {"I_List_CST_Maquinas":folder+"MAQUINAS.CSV","I_Dados_MAP.032.CST_Maquinas":None}
+
+importList =\
+[["I_Dados_STG.700.Carga Mg de Mkt PIS Embutido", folder+"mm.txt", {"Line Item":"Valor Actual"}],
+["I_Dados_STG.700.Carga Mg de Mkt PIS Zero",folder+"mm.txt", {"Line Item":"Valor Actual"}],
+["I_Dados_REC.200.Margem de Mercado - Real Base",None, {"Line Item":"Valor Actual"}],
+["I_Dados_REC.200.Margem de Mercado - Real PIS/Cofins",None, {"Line Item":"Valor Actual"}],
+["I_Dados_STG.001.Carga OPEX arquivo",folder+"OPEX.csv", {"Line Item":"Valor Realizado Pós Rateio"}],
+["I_Dados_EBT.100.EBITDA - Real",None, {"Line Item":"Valor Realizado Pós Rateio"}]]
+
+#importList = [["I_Dados_MAP.002.UN Resultado", None, {}]]
+# ----------- DEFINICAO DE IMPORT -----------
+
+
+
+
+# ----------- DEFINICAO DE PROCESSOS ---------
+processList=[["Carga Centro de Custo e Unidades", {}]]
+# ----------- DEFINICAO DE PROCESSOS -----------
 
 
 # Execucao do script
 def main():
-    try:
-        # execucao caller
-        exec= dataAcquisition.main(user, pwd, model, importList, processName)
-    except:
-        print("998 - An exception occurred.")
-
+    # execucao caller
+    exec= dataAcquisition.main(user, pwd, model, importList, processList)
 
 
 if __name__ == '__main__':
