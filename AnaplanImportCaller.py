@@ -24,6 +24,7 @@ importList =\
 
 # ----------- PROCESS DEFINITION ---------
 #processList=[["Carga Centro de Custo e Unidades", {}]]
+#processList=[["Testing Process",{}]]
 processList=[]
 # ----------- END PROCESS DEFINITION -----------
 

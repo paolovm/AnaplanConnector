@@ -2,12 +2,16 @@ import base64
 import requests
 from requests.exceptions import HTTPError
 import json
-import anaplanLib
 import sendemail
 from anaplanConnection import AnaplanConnection
 
+#===============================================================================
+# Defining global variables
+#===============================================================================
+
 urlAuth = "https://auth.anaplan.com/token/authenticate"
 urlStem = "https://api.anaplan.com/2/0"
+__base_url__ = "https://api.anaplan.com/2/0/workspaces"
 __post_body__ = {
             "localeName":"en_US"
         }
@@ -53,13 +57,13 @@ class anaplanImport(object):
         print("IMPORT006 - %s - Import Triggered" %(importFile))
         # # Get the status of the import
         print("IMPORT007 - %s - Checking status of import" %(importFile))
-        checkStatusImport = cls.check_status(tokenValue, workspaceId, modelId, importId,
-                                                  executeImport)
+        url = urlStem + "/workspaces/" + workspaceId + "/models/" + modelId + "/imports/" + importId + "/tasks"
+        post_header = {'Authorization': 'AnaplanAuthToken %s' % tokenValue, 'Content-Type': 'application/json'}
+        checkStatusImport = check_status(url, executeImport,post_header)
         print("IMPORT008 - %s - Status Retrieved" %(importFile))
         emailSubject = "Anaplan Execution - " + importFile
         emailText = checkStatusImport
         sendemail.sendEmail(emailSubject,emailText)
-#        print(checkStatusImport)
 
     @classmethod
     def executeProcess(cls, conn, processName, **params):
@@ -74,7 +78,7 @@ class anaplanImport(object):
         # # Trigger the import
         print("PROC003 - %s - Executing the Process" %(processName))
         print(params)
-        executeImport = anaplanLib.execute_action_with_parameters(conn, processId, 3, **params)
+        executeImport = cls.execute_action_with_parameters(conn, processId, 3, **params)
         print("PROC004 - %s - Process Executed" %(processName))
         # # Get the status of the import
         emailSubject = "Anaplan Execution - " + processName
@@ -201,48 +205,106 @@ class anaplanImport(object):
         return taskId
 
     @classmethod
-    def check_status(cls, token, wsId, modelId, importId, taskId):
+    def execute_action_with_parameters(cls, conn, actionId, retryCount, **params):
+        '''
+        :param conn: AnaplanConnection object which contains authorization string, workspace ID, and model ID
+        :param actionId: ID of the action in the Anaplan model
+        :param retryCount: The number of times to attempt to retry the action if it fails
+        '''
         # ===========================================================================
-        # This function monitors the status of Anaplan action. Once complete it returns
-        # the JSON text of the response.
+        # This function reads the ID of the desired import or process to run with
+        # mapping parameters declared, POSTs the task to the Anaplan API to execute
+        # the action, then monitors the status until complete.
         # ===========================================================================
-        post_header = {'Authorization': 'AnaplanAuthToken %s' % token, 'Content-Type': 'application/json'}
+        authorization = conn.authorization
+        workspaceGuid = conn.workspaceGuid
+        modelGuid = conn.modelGuid
+
+        post_header = {'Authorization': 'AnaplanAuthToken %s' % authorization, 'Content-Type': 'application/json'}
+        post_body = {'localeName': 'en_US'}
+
+        if len(params) == 0:
+            pass
+        elif len(params) > 1:
+            paramsbody = []
+            for key, value in params.items():
+                paramstemp = {'entityType': key, 'entityName': value}
+                paramsbody.append(paramstemp)
+            post_body['mappingParameters'] = paramsbody
+        else:
+            for key, value in params.items():
+                #            body += "{\"entityType\":\"" + key + "\"" + ","+ "\"entityName\":\"" + value + "\"}"
+                paramsbody = [{'entityType': key, 'entityName': value}]
+            post_body['mappingParameters'] = paramsbody
+
+        if actionId[:3] == "112":
+            print("Running action " + actionId)
+            url = __base_url__ + "/" + workspaceGuid + "/models/" + modelGuid + "/imports/" + actionId + "/tasks"
+            taskId = cls.run_action_with_parameters(url, post_header, retryCount, post_body)
+            return check_status(url, taskId, post_header)
+        elif actionId[:3] == "118":
+            print("Running action " + actionId)
+            url = __base_url__ + "/" + workspaceGuid + "/models/" + modelGuid + "/processes/" + actionId + "/tasks"
+            taskId = cls.run_action_with_parameters(url, post_header, retryCount, post_body)
+            # taskId = run_action(url, post_header, retryCount)
+            return check_status(url, taskId, post_header)
+        else:
+            print("Incorrect action ID provided! Only imports and processes may be executed with parameters.")
+
+    @classmethod
+    def run_action_with_parameters(cls,url, post_header, retryCount, post_body):
+        '''
+        @param url: POST URL for Anaplan action
+        @param post_header: Authorization header string
+        @param retryCount: Number of times to retry executino of the action
+        '''
+        # ===========================================================================
+        # This function executes the Anaplan import or process with mapping parameters,
+        # if there is a server error it will wait, and retry a number of times
+        # defined by the user. Once the task is successfully created, the task ID is returned.
+        # ===========================================================================
+        state = 0
+        sleepTime = 10
         while True:
             try:
-                headers = {'Authorization': 'AnaplanAuthToken %s' % token, 'Content-Type': 'application/json'}
-                get_status = requests.get(
-                    urlStem + "/workspaces/" + wsId + "/models/" + modelId + "/imports/" + importId + "/tasks/" + taskId,
-                    headers=headers)
-                get_status.raise_for_status()
+                run_action = requests.post(url, headers=post_header, json=post_body)
+                run_action.raise_for_status()
             except HTTPError as e:
                 raise HTTPError(e)
-            status = json.loads(get_status.text)
-            status = status["task"]["taskState"]
-            if status == "COMPLETE":
-                results = json.loads(get_status.text)
-                results = results["task"]
+            if run_action.status_code != 200 and state < retryCount:
+                sleep(sleepTime)
+                try:
+                    run_action = requests.post(url, headers=post_header, json=post_body)
+                    run_action.raise_for_status()
+                except HTTPError as e:
+                    raise HTTPError(e)
+                state += 1
+                sleepTime = sleepTime * 1.5
+            else:
                 break
-        return parse_task_response(results, token, wsId, modelId, importId, taskId, post_header)
+        taskId = json.loads(run_action.text)
+        taskId = taskId["task"]
+        return taskId["taskId"]
 
-def parse_task_response(results, token, wsId, modelId, importId, taskId, post_header):
-    #===========================================================================
-    # This function reads the JSON results of the completed Anaplan task and returns
-    # the job details.
-    #===========================================================================
+def parse_task_response(results, url, taskId, post_header):
     '''
     :param results: JSON dump of the results of an Anaplan action
     '''
+    # ===========================================================================
+    # This function reads the JSON results of the completed Anaplan task and returns
+    # the job details.
+    # ===========================================================================
     job_status = results["currentStep"]
-#    print(job_status)
     failure_alert = str(results["result"]["failureDumpAvailable"])
+
     if job_status == "Failed.":
         error_message = str(results["result"]["details"][0]["localMessageText"])
-#        print("The task has failed to run due to an error: " + error_message)
+        print("The task has failed to run due to an error: " + error_message)
         return "The task has failed to run due to an error: " + error_message
     else:
         if failure_alert == "True":
             try:
-                dump = requests.get(urlStem + "/workspaces/" + wsId + "/models/" + modelId + "/imports/" + importId + "/tasks/" + taskId + '/' + "dump", headers=post_header)
+                dump = requests.get(url + "/" + taskId + '/' + "dump", headers=post_header)
                 dump.raise_for_status()
             except HTTPError as e:
                 raise HTTPError(e)
@@ -258,23 +320,23 @@ def parse_task_response(results, token, wsId, modelId, importId, taskId, post_he
                 object_id = str(nestedResults["objectId"])
                 load_detail = load_detail + "Process action " + object_id + " completed. Failure: " + process_subfailure + '\n'
                 if process_subfailure == "True":
-                        local_message = str(nestedResults["details"][0]["localMessageText"])
-                        details = nestedResults["details"][0]["values"]
-                        for i in details:
-                            error_detail = error_detail + i + '\n'
-                        try:
-                            dump = requests.get(urlStem + "/workspaces/" + wsId + "/models/" + modelId + "/imports/" + importId + "/tasks/" + taskId + '/' + "dumps" + '/' + object_id,  headers=post_header)
-                            dump.raise_for_status()
-                        except HTTPError as e:
-                            raise HTTPError(e)
-                        report = "Error dump for " + object_id + '\n' + dump.text
-                        anaplan_process_dump += report
-                        failure_details = failure_details + local_message
+                    local_message = str(nestedResults["details"][0]["localMessageText"])
+                    details = nestedResults["details"][0]["values"]
+                    for i in details:
+                        error_detail = error_detail + i + '\n'
+                    try:
+                        dump = requests.get(url + "/" + taskId + '/' + "dumps" + '/' + object_id, headers=post_header)
+                        dump.raise_for_status()
+                    except HTTPError as e:
+                        raise HTTPError(e)
+                    report = "Error dump for " + object_id + '\n' + dump.text
+                    anaplan_process_dump += report
+                    failure_details = failure_details + local_message
             if anaplan_process_dump != "":
-#                print("The requested job is " + job_status)
+                # print("The requested job is " + job_status)
                 return load_detail + '\n' + "Details:" + '\n' + error_detail + '\n' + "Failure dump(s):" + '\n' + anaplan_process_dump
             else:
-#                print("The requested job is " + job_status)
+                # print("The requested job is " + job_status)
                 return load_detail
         else:
             if "details" in results["result"]:
@@ -288,11 +350,36 @@ def parse_task_response(results, token, wsId, modelId, importId, taskId, post_he
                     for i in results["result"]["details"][0]["values"]:
                         load_detail = load_detail + i + '\n'
                     if failure_alert == "True":
-#                        print("The requested job is " + job_status)
+                        # print("The requested job is " + job_status)
                         return "Failure Dump Available: " + failure_alert + ", Successful: " + success_report + '\n' + "Load details:" + '\n' + load + '\n' + load_detail + '\n' + "Failure dump:" + '\n' + dump
                     else:
-#                        print("The requested job is " + job_status)
+                        # print("The requested job is " + job_status)
                         return "Failure Dump Available: " + failure_alert + ", Successful: " + success_report + '\n' + "Load details:" + '\n' + load + '\n' + load_detail
+
+def check_status(url, taskId, post_header):
+    '''
+    @param url: Anaplan task URL
+    @param taskId: ID of the Anaplan task executed
+    @param post_header: Authorization header value
+    '''
+    # ===========================================================================
+    # This function monitors the status of Anaplan action. Once complete it returns
+    # the JSON text of the response.
+    # ===========================================================================
+    while True:
+        try:
+            get_status = requests.get(url + "/" + taskId, headers=post_header)
+            get_status.raise_for_status()
+        except HTTPError as e:
+            raise HTTPError(e)
+        status = json.loads(get_status.text)
+        status = status["task"]["taskState"]
+        if status == "COMPLETE":
+            results = json.loads(get_status.text)
+            results = results["task"]
+            break
+
+    return parse_task_response(results, url, taskId, post_header)
 
 def convertbase64(connectString):
     cred64 = base64.b64encode(bytes(connectString, 'UTF-8')).decode('utf-8')
