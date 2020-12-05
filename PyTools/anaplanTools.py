@@ -34,23 +34,33 @@ class anaplanImport(object):
         return conn
 
     @classmethod
-    def executeImport(cls, conn, importFile, contentToSend, **params):
+    def sendFile(cls, conn, datasourceName, contentToSend, **params):
+        tokenValue = conn.authorization
+        workspaceId = conn.workspaceGuid
+        modelId = conn.modelGuid
+        # Get the list of imports and choose one with the importId and the datasourceId
+        print ('DATA001 - %s - Retrieving the list of imports' %(datasourceName))
+        importInfos = cls.getDatasourceInfo(tokenValue, workspaceId, modelId, datasourceName)
+        print ("DATA002 - %s - Import and Datasource ID retrieved" %(datasourceName))
+        datasourceId = importInfos[1]
+        # Send the data to Anaplan to update datasource
+        print("DATA003 - %s - Evaluating data to send to Anaplan" %(datasourceName))
+        if (contentToSend != None):
+            sendData = cls.sendData(tokenValue, workspaceId, modelId, datasourceId, 1, contentToSend)
+            print("DATA004 - %s - Data Sent" %(datasourceName))
+        else:
+            print("DATA004 - %s - No Data to send" %(datasourceName))
+
+    @classmethod
+    def executeImport(cls, conn, importFile, **params):
         tokenValue = conn.authorization
         workspaceId = conn.workspaceGuid
         modelId = conn.modelGuid
         # Get the list of imports and choose one with the importId and the datasourceId
         print ('IMPORT001 - %s - Retrieving the list of imports' %(importFile))
         importInfos = cls.getImportInfo(tokenValue, workspaceId, modelId, importFile)
-        print ("IMPORT002 - %s - Import and Datasource ID retrieved" %(importFile))
+        print ("IMPORT002 - %s - Import ID retrieved" %(importFile))
         importId = importInfos[0]
-        datasourceId = importInfos[1]
-        # Send the data to Anaplan to update datasource
-        print("IMPORT003 - %s - Evaluating data to send to Anaplan" %(importFile))
-        if (contentToSend != None):
-            sendData = cls.sendData(tokenValue, workspaceId, modelId, datasourceId, 1, contentToSend)
-            print("IMPORT004 - %s - Data Sent" %(importFile))
-        else:
-            print("IMPORT004 - %s - o Data to send" %(importFile))
         # # Trigger the import
         print("IMPORT005 - %s - Executing the Import" %(importFile))
         executeImport = cls.importTrigger(tokenValue, workspaceId, modelId, importId, **params)
@@ -127,6 +137,22 @@ class anaplanImport(object):
         importId = importsInfo[0]["id"]
         datasourceId = importsInfo[0]["importDataSourceId"]
         return importId, datasourceId
+
+    @classmethod
+    def getDatasourceInfo(cls, token, wsId, modelId, dataSourceName):
+        # Get the list of imports and choose one with the importId and the datasourceId
+        headers = {'Authorization': 'AnaplanAuthToken %s' % token, 'Content-Type': 'application/json'}
+        response = requests.get(
+            urlStem + "/workspaces/" + wsId + "/models/" + modelId + "/files",
+            headers=headers
+        )
+        jsonResponse = json.loads(response.content)
+        filesArray = jsonResponse["files"]
+        print(filesArray)
+        importsInfo = [importInfo for importInfo in filesArray if importInfo['name'] == dataSourceName]
+        datasourceId = importsInfo[0]["id"]
+        print(datasourceId)
+        return datasourceId
 
     @classmethod
     def getProcessInfo(cls, token, wsId, modelId, processName):
