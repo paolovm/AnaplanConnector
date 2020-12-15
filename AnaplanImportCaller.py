@@ -5,25 +5,23 @@ import dataAcquisition
 # Anaplan Credentials
 model = "Planning"
 user = "paolovm3@yahoo.com.br"
-pwd = "Number28"
+pwd = ""
 
 
 # Folder with files
-folder = "Data/"
+folder = "C:/Users/paolo.malafaia/Dropbox (Personal)/Flexthink/Py Scripts/VigmaPy/"
 
 # ----------- IMPORT DEFINITION -----------
 dataList =\
 [
-["sku.csv", 'C:/Users/paolo.malafaia/Dropbox (Personal)/Flexthink/Py Scripts/VigmaPy/sku.csv'],
-["ska.csv",'C:/Users/paolo.malafaia/Dropbox (Personal)/Flexthink/Py Scripts/VigmaPy/ska.csv']
+["sku.csv", folder+'sku.csv'],
+["ska.csv",folder+'ska.csv']
 ]
 # ----------- END IMPORT DEFINITION -----------
 
 # ----------- IMPORT DEFINITION -----------
 importList =\
 [
-["Asset Month Price from sku.csv", {}],
-["Asset Month Price from ska.csv",{}]
 ]
 # ----------- END IMPORT DEFINITION -----------
 
