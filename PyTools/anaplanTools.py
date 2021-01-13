@@ -40,9 +40,8 @@ class anaplanImport(object):
         modelId = conn.modelGuid
         # Get the list of imports and choose one with the importId and the datasourceId
         print ('DATA001 - %s - Retrieving the list of imports' %(datasourceName))
-        importInfos = cls.getDatasourceInfo(tokenValue, workspaceId, modelId, datasourceName)
+        datasourceId = cls.getDatasourceInfo(tokenValue, workspaceId, modelId, datasourceName)
         print ("DATA002 - %s - Import and Datasource ID retrieved" %(datasourceName))
-        datasourceId = importInfos[1]
         # Send the data to Anaplan to update datasource
         print("DATA003 - %s - Evaluating data to send to Anaplan" %(datasourceName))
         if (contentToSend != None):
@@ -148,10 +147,8 @@ class anaplanImport(object):
         )
         jsonResponse = json.loads(response.content)
         filesArray = jsonResponse["files"]
-        print(filesArray)
         importsInfo = [importInfo for importInfo in filesArray if importInfo['name'] == dataSourceName]
         datasourceId = importsInfo[0]["id"]
-        print(datasourceId)
         return datasourceId
 
     @classmethod

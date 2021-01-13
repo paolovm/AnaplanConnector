@@ -1,12 +1,13 @@
 import sys
 sys.path.insert(1, 'PyTools/')
 import dataAcquisition
+import decrypt
 
 # Anaplan Credentials
 model = "Planning"
 user = "paolovm3@yahoo.com.br"
-pwd = ""
-
+pwdFile='PyTools/mssqltip_bytes.bin'
+pwdKey='ck5UFW9QZzpQe-oNXwiRJm3AQsf2HwUWlY_RjzDM5t0='
 
 # Folder with files
 folder = "C:/Users/paolo.malafaia/Dropbox (Personal)/Flexthink/Py Scripts/VigmaPy/"
@@ -37,6 +38,7 @@ processList=[["Testing Process",{}]]
 # ----------- SCRIPT DEFINITION ----------
 def main():
     # caller
+    pwd = decrypt.pwdDecrypt(pwdFile,pwdKey)
     exec= dataAcquisition.main(user, pwd, model, dataList, importList, processList)
 # ----------- END SCRIPT DEFINITION ----------
 

@@ -4,7 +4,6 @@ from anaplanTools import anaplanImport as anaplan
 
 
 def singleFileImport(conn, datasourceName, fileLocation, **params):
-    print("execution control 7")
     data_content=None
     if (fileLocation != None):
         with open(fileLocation, "rt",encoding="latin-1") as f:
